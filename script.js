@@ -102,31 +102,23 @@ const renderError = function (msg) {
 //     });
 // };
 
+const getJSON = function (url) {
+  return fetch(url).then(response => {
+    if (!response.ok) {
+      throw new Error(`Country not found (${response.status})`);
+    }
+    return response.json();
+  });
+};
+
 const getCountryData = function (country) {
-  // fetch returns a Promise that resolves to a response object
-  fetch(`https://restcountries.com/v3.1/name/${country}`)
-    .then(response => {
-      console.log(response);
-
-      if (!response.ok) {
-        throw new Error(`Country not found (${response.status})`);
-      }
-
-      // the json() method returns a Promise that resolves to a data object
-      return response.json();
-    })
+  getJSON(`https://restcountries.com/v3.1/name/${country}`)
     .then(data => {
       renderCountry(data[0]);
       // const neighbor = data[0].borders[0];
       const neighbor = 'asdfasd';
       if (!neighbor) return;
-      return fetch(`https://restcountries.com/v3.1/alpha/${neighbor}`);
-    })
-    .then(response => {
-      if (!response.ok) {
-        throw new Error(`Country not found (${response.status})`);
-      }
-      return response.json();
+      return getJSON(`https://restcountries.com/v3.1/alpha/${neighbor}`);
     })
     .then(data => renderCountry(data[0], 'neighbor'))
     .catch(err => {
