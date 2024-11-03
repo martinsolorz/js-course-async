@@ -102,28 +102,33 @@ const renderError = function (msg) {
 //     });
 // };
 
-const getJSON = function (url) {
+const getJSON = function (url, errorMsg = 'Something went wrong') {
   return fetch(url).then(response => {
     if (!response.ok) {
-      throw new Error(`Country not found (${response.status})`);
+      throw new Error(`${errorMsg} (${response.status})`);
     }
     return response.json();
   });
 };
 
 const getCountryData = function (country) {
-  getJSON(`https://restcountries.com/v3.1/name/${country}`)
+  getJSON(
+    `https://restcountries.com/v3.1/name/${country}`,
+    'Country not found.'
+  )
     .then(data => {
       renderCountry(data[0]);
-      // const neighbor = data[0].borders[0];
-      const neighbor = 'asdfasd';
-      if (!neighbor) return;
-      return getJSON(`https://restcountries.com/v3.1/alpha/${neighbor}`);
+      if (!data[0].borders) throw new Error('No neighbor found!');
+      const neighbor = data[0].borders[0];
+      return getJSON(
+        `https://restcountries.com/v3.1/alpha/${neighbor}`,
+        'Country not found'
+      );
     })
     .then(data => renderCountry(data[0], 'neighbor'))
     .catch(err => {
       console.log(`${err}`);
-      renderError(`Something went wrong: ${err.message}. Try again !`);
+      renderError(`Something went wrong: ${err.message} Try again !`);
     })
     .finally(() => {
       countriesContainer.style.opacity = 1;
